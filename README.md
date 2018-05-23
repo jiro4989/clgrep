@@ -4,7 +4,7 @@ grep for changelog.
 
 ## Install
 
-`go get github.com/jiro4989/clgrep.git`
+`go get github.com/jiro4989/clgrep`
 
 ## Usage
 

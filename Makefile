@@ -1,7 +1,7 @@
 SRCS := main.go
 APPNAME := clgrep
 
-.PHONY: build cross-build archive
+.PHONY: build cross-build archive deploy
 
 build:
 	go build -o bin/$(APPNAME) $(SRCS)
@@ -31,3 +31,6 @@ archive: cross-build
 	( cd dist/ && tar czf darwin_386.tar.gz darwin_386 )
 	( cd dist/ && tar czf windows_amd64.tar.gz windows_amd64 )
 	( cd dist/ && tar czf windows_386.tar.gz windows_386 )
+
+deploy: archive
+	ghr v1.0.1 dist/
