@@ -24,7 +24,7 @@ cross-build:
 
 archive: cross-build
 	-rm dist/*.tar.gz
-	find dist/ -mindepth 1 -type d | while read -r d; do cp ./README.md "$d"/ ; done
+	find dist/ -mindepth 1 -type d | while read -r d; do cp ./README.md "$$d"/ ; done
 	( cd dist/ && tar czf linux_amd64.tar.gz linux_amd64 )
 	( cd dist/ && tar czf linux_386.tar.gz linux_386 )
 	( cd dist/ && tar czf darwin_amd64.tar.gz darwin_amd64 )
