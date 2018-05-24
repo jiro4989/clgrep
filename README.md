@@ -15,6 +15,9 @@ grep for changelog.
 - `-h` Help
 - `-i` Ignore case
 - `-r` Reverse sort
+- `-t` Search tags
+- `--today` Only today
+- `--no-indent` Remove indent
 
 ## Thanks
 

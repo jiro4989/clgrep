@@ -1,20 +1,23 @@
 2018/05/23 21:18:28  
 
 	* test: ほげ 4
-	ふが
-	てんぷ
+	- ふが
+	- てんぷ
 
 	* sample: さんぷる 3
-	ほげ
-	ぴよ
+	- ほげ
+	- ぴよ
 
 	* test: ほぎゃ 2
-	ねこ
-	にゃーん
+	- ねこ
+	- にゃーん
 
 	* sample: Example 1
-	foobar
+	- foobar
+	  - sample
+	  - sample
+	  - sample
 
 	* SAMPLE: Example 0
-	foobar
+	- foobar
 

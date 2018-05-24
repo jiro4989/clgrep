@@ -7,48 +7,37 @@ import (
 	"os"
 	"regexp"
 	"strings"
+
+	flags "github.com/jessevdk/go-flags"
 )
 
+// options オプション引数
+type options struct {
+	IgnoreCase bool `short:"i" long:"ignore-case" description:"Ignore case"`
+	Reverse    bool `short:"r" long:"reverse" description:"Reverse sort"`
+	Tag        bool `short:"t" long:"tag" description:"Search tags"`
+	Today      bool `long:"today" description:"Only today"`
+	NoIndent   bool `long:"no-indent" description:"Remove indent"`
+}
+
 func main() {
-	// 引数チェック
-	if len(os.Args) < 2 {
-		printHelp()
+	var opts options
+	args, err := flags.Parse(&opts)
+	if err != nil {
+		log.Println(err)
 		return
 	}
 
-	args := os.Args[1:]
-	nargs := make([]string, 0)
-
-	ignoreCaseFlag := false
-	reverseSortFlag := false
-	// オプション引数チェック
-	for _, v := range args {
-		if v == "-h" {
-			printHelp()
-			return
-		}
-		if v == "-i" {
-			ignoreCaseFlag = true
-			continue
-		}
-		if v == "-r" {
-			reverseSortFlag = true
-			continue
-		}
-		nargs = append(nargs, v)
-	}
-
-	// オプション引数しか指定されていない場合は終了
-	if len(nargs) < 2 {
-		printHelp()
+	if len(args) < 1 {
+		log.Println("Need arguments. Use -h options.")
 		return
 	}
 
-	sw := nargs[0] // 検索ワード
-	fn := nargs[1] // 読み込みファイル
+	sw := args[0] // 検索ワード
+	fn := args[1] // 読み込みファイル
 
 	// 大小比較なし
-	if ignoreCaseFlag {
+	if opts.IgnoreCase {
 		sw = strings.ToLower(sw)
 	}
 
@@ -69,11 +58,14 @@ func main() {
 			break
 		}
 		t := sc.Text()
+		if opts.NoIndent {
+			t = strings.Replace(t, "\t", "", 1)
+		}
 		para = append(para, t)
 		if t == "" {
 			for _, v := range para {
 				iv := v
-				if ignoreCaseFlag {
+				if opts.IgnoreCase {
 					iv = strings.ToLower(iv)
 				}
 				if re.MatchString(iv) {
@@ -87,25 +79,11 @@ func main() {
 	}
 
 	// 逆順フラグが立ってるときは逆順ソート
-	if reverseSortFlag {
+	if opts.Reverse {
 		reverse(matches)
 	}
 	matchedText := strings.Join(matches, "\n")
 	fmt.Println(matchedText)
-}
-
-func printHelp() {
-	fmt.Println(`
-	clgrep - grep for changelog
-
-	usage:
-		clgrep [options] search_word file_name
-
-	options:
-		-h Help
-		-i Ignore case
-		-r Reverse sort
-	`)
 }
 
 // 配列を逆順ソートして上書きする
