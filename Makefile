@@ -8,6 +8,9 @@ BUILD_CMD := go build $(LDFLAGS)
 build:
 	$(BUILD_CMD) -o bin/$(APPNAME) $(SRCS)
 
+install: var-check build
+	go install $(LDFLAGS)
+
 cross-build: var-check
 	-mkdir dist/
 	-rm -rf dist/*
