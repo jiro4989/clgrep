@@ -12,12 +12,20 @@ grep for changelog.
 
 ### Options
 
-- `-h` Help
-- `-i` Ignore case
-- `-r` Reverse sort
-- `-t` Search tags
-- `--today` Only today
-- `--no-indent` Remove indent
+```
+Usage:
+  main [OPTIONS]
+
+Application Options:
+  -i, --ignore-case   Ignore case
+  -r, --reverse       Reverse sort
+  -t, --tag           Search tags
+      --today-format= Only today
+      --show-indent   Show indent
+
+Help Options:
+  -h, --help          Show this help message
+```
 
 ## Thanks
 

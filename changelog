@@ -1,23 +1,26 @@
-2018/05/23 21:18:28  
+2018/05/26 04:07:34  
 
-	* test: ほげ 4
-	- ふが
-	- てんぷ
+	* main.go: v1.1.0リリース。
 
-	* sample: さんぷる 3
-	- ほげ
-	- ぴよ
+	* main.go: NoIndenオプションを廃止してShowIndentオプションに変更した。
+	これにより、オプション指定をしない場合はインデントをデフォルトでは削除する。
 
-	* test: ほぎゃ 2
-	- ねこ
-	- にゃーん
+	* main.go: Versionオプションを追加した。
+	clgrep --versionでビルドバージョンを確認できる。
 
-	* sample: Example 1
-	- foobar
-	  - sample
-	  - sample
-	  - sample
+	* main.go: TodayFormatオプションを追加した。
+	clgrep --today-format 2006/01/02指定で今日の範囲からgrepする。
 
-	* SAMPLE: Example 0
-	- foobar
+	* main_test.go: main.go#reverseのテストコードを追加した。
 
+	* Makefile: ビルド時にバージョン番号を含めるように変更した。
+	同様に、デプロイタスクのバージョン番号もmake実行時にコマンドラインから
+	入力するようにし変更した。
+
+	* Makefile (archive): changelogも配布物に含めるように修正。
+
+	* README.md: オプションの説明文をclgrep -hのテキストと統一した。
+
+2018/05/24 00:00:00  
+
+	* main.go: v1.0.0リリース

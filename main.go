@@ -17,26 +17,30 @@ type options struct {
 	IgnoreCase  bool   `short:"i" long:"ignore-case" description:"Ignore case"`
 	Reverse     bool   `short:"r" long:"reverse" description:"Reverse sort"`
 	Tag         bool   `short:"t" long:"tag" description:"Search tags"`
+	Version     func() `short:"v" long:"version" description:"Version"`
 	TodayFormat string `long:"today-format" description:"Only today"`
 	ShowIndent  bool   `long:"show-indent" description:"Show indent"`
 }
 
 // opts はコマンドライン引数です
 var (
-	opts  options
-	today string
+	opts    options
+	today   string
+	version string
 )
 
 func main() {
-	args, err := flags.Parse(&opts)
-	if err != nil {
-		log.Println(err)
+	opts.Version = func() {
+		fmt.Println(version)
 		return
 	}
+	args, err := flags.Parse(&opts)
+	if err != nil {
+		os.Exit(1)
+	}
 
-	if len(args) < 1 {
-		log.Println("Need arguments. Use -h options.")
-		return
+	if len(args) < 2 {
+		os.Exit(1)
 	}
 
 	sw := args[0] // 検索ワード
