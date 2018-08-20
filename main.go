@@ -44,10 +44,10 @@ func main() {
 		panic(err)
 	}
 
-	section.Print(ss)
+	ss.Print()
 }
 
-func clgrep(args []string, opts options.Options) ([]section.Section, error) {
+func clgrep(args []string, opts options.Options) (section.Sections, error) {
 	l := len(args)
 	if l < 1 {
 		return nil, errors.New("引数が不足しています。")
@@ -88,7 +88,7 @@ func clgrep(args []string, opts options.Options) ([]section.Section, error) {
 
 	// ヘッダ行から検索フィルタ
 	if opts.Tag {
-		ss = section.SearchHeader(ss, re)
+		ss = ss.SearchHeader(re)
 	}
 
 	if len(ss) < 1 {
@@ -97,17 +97,17 @@ func clgrep(args []string, opts options.Options) ([]section.Section, error) {
 
 	// 逆順ソート
 	if opts.Reverse {
-		section.Reverse(ss)
+		ss.Reverse()
 	}
 
 	if !opts.ShowIndent {
-		ss = section.TrimSpace(ss)
+		ss = ss.TrimSpace()
 	}
 
 	return ss, nil
 }
 
-func findMatchedSections(r *os.File, re *regexp.Regexp) ([]section.Section, error) {
+func findMatchedSections(r *os.File, re *regexp.Regexp) (section.Sections, error) {
 	var sect section.Section = make([]string, 0)
 	matchedSections := make([]section.Section, 0)
 
