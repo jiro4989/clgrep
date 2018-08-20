@@ -25,7 +25,7 @@ func main() {
 	var opts options.Options
 	opts.Version = func() {
 		fmt.Println(Version)
-		return
+		os.Exit(0)
 	}
 
 	args, err := flags.Parse(&opts)
