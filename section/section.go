@@ -40,14 +40,17 @@ func (s Section) MatchesTag(re *regexp.Regexp) bool {
 
 type Sections []Section
 
-func (ss Sections) SearchHeader(re *regexp.Regexp) Sections {
+func (ss Sections) MatchTag(re *regexp.Regexp) Sections {
+	if len(ss) < 1 {
+		return ss
+	}
+
 	matches := make([]Section, 0)
 	for _, s := range ss {
 		if len(s) < 1 {
 			continue
 		}
-		header := s[0]
-		if re.MatchString(header) {
+		if s.MatchesTag(re) {
 			matches = append(matches, s)
 		}
 	}

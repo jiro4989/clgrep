@@ -88,7 +88,7 @@ func clgrep(args []string, opts options.Options) (section.Sections, error) {
 
 	// ヘッダ行から検索フィルタ
 	if opts.Tag {
-		ss = ss.SearchHeader(re)
+		ss = ss.MatchTag(re)
 	}
 
 	if len(ss) < 1 {
