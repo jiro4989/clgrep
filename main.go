@@ -82,13 +82,17 @@ func clgrep(args []string, opts options.Options) ([]section.Section, error) {
 		return nil, err
 	}
 
+	if len(ss) < 1 {
+		return ss, nil
+	}
+
 	// ヘッダ行から検索フィルタ
 	if opts.Tag {
 		ss = section.SearchHeader(ss, re)
-		// 2未満だったらソート判定すら不要なのでreturn
-		if len(ss) < 2 {
-			return ss, nil
-		}
+	}
+
+	if len(ss) < 1 {
+		return ss, nil
 	}
 
 	// 逆順ソート
