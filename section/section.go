@@ -7,6 +7,13 @@ import (
 	"time"
 )
 
+// Section は一つの段落です。
+// *foobar: hogehoge
+// foobar
+// foooba
+// といったまとまりを1セクションとして扱います。
+// セクションの区切れ目は空白文字のみが出現するか、
+// 何も出現しない行です。
 type Section []string
 
 // MatchesRegexp はセクション内のいずれかの箇所で正規表現マッチするかを判定する
@@ -20,6 +27,8 @@ func (s Section) MatchesRegexp(re *regexp.Regexp) bool {
 }
 
 // MatchesTag はヘッダのタグで正規表現マッチしたかを判定する
+// ここでいうタグとは、セクションのヘッダ行の
+// *tag: の箇所を指します。
 func (s Section) MatchesTag(re *regexp.Regexp) bool {
 	if len(s) < 1 {
 		return false
@@ -38,8 +47,12 @@ func (s Section) MatchesTag(re *regexp.Regexp) bool {
 	return re.MatchString(tag)
 }
 
+// Sections はSectionの配列です。
 type Sections []Section
 
+// MatchTag はタグにマッチしたセクションのみを返します。
+// ここでいうタグとは、セクションのヘッダ行の
+// *tag: の箇所を指します。
 func (ss Sections) MatchTag(re *regexp.Regexp) Sections {
 	if len(ss) < 1 {
 		return ss

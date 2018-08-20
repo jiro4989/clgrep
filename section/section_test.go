@@ -43,3 +43,15 @@ func TestMatchesTag(t *testing.T) {
 	re = regexp.MustCompile(`m...`)
 	assert.Equal(t, true, f("*main.go:").MatchesTag(re))
 }
+
+func TestMatchTag(t *testing.T) {
+	// TODO
+}
+
+func TestReverse(t *testing.T) {
+	// TODO
+}
+
+func TestMatchDate(t *testing.T) {
+	// TODO
+}
