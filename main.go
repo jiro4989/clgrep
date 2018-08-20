@@ -2,146 +2,130 @@ package main
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
-	"log"
 	"os"
 	"regexp"
 	"strings"
-	"time"
 
 	flags "github.com/jessevdk/go-flags"
+	options "github.com/jiro4989/clgrep/options"
+	"github.com/jiro4989/clgrep/section"
 )
-
-// options オプション引数
-type options struct {
-	IgnoreCase  bool   `short:"i" long:"ignore-case" description:"Ignore case"`
-	Reverse     bool   `short:"r" long:"reverse" description:"Reverse sort"`
-	Tag         bool   `short:"t" long:"tag" description:"Search tags"`
-	Version     func() `short:"v" long:"version" description:"Version"`
-	TodayFormat string `long:"today-format" description:"Only today"`
-	ShowIndent  bool   `long:"show-indent" description:"Show indent"`
-}
 
 // opts はコマンドライン引数です
 var (
-	opts    options
-	today   string
-	version string
+	Version string
 )
 
+// オプションでない引数の数によって挙動が変化する
+// 引数1つの場合 -> 標準入力に対してgrep
+// 引数2つの場合 -> 第二引数は検索対象のファイル
 func main() {
+	var opts options.Options
 	opts.Version = func() {
-		fmt.Println(version)
+		fmt.Println(Version)
 		return
 	}
+
 	args, err := flags.Parse(&opts)
 	if err != nil {
+		os.Exit(0)
+	}
+
+	if len(args) < 1 {
+		fmt.Println("Need arguments. args=", args)
 		os.Exit(1)
 	}
 
-	if len(args) < 2 {
-		os.Exit(1)
-	}
-
-	sw := args[0] // 検索ワード
-	fn := args[1] // 読み込みファイル
-
-	today = time.Now().Format(opts.TodayFormat)
-
-	// 大小比較なし
-	if opts.IgnoreCase {
-		sw = strings.ToLower(sw)
-	}
-
-	r, err := os.Open(fn)
+	// 引数と検索オプションにマッチしたセクションをgrep
+	ss, err := clgrep(args, opts)
 	if err != nil {
-		log.Println(err)
-		return
+		panic(err)
 	}
-	defer r.Close()
 
-	swRe := regexp.MustCompile(".*" + sw + ".*")
+	section.Print(ss)
+}
+
+func clgrep(args []string, opts options.Options) ([]section.Section, error) {
+	l := len(args)
+	if l < 1 {
+		return nil, errors.New("引数が不足しています。")
+	}
+
+	// 引数が一つの場合は標準入力からデータ読み取り
+	// 引数が２つ以上のときは、ファイル読み取り
+	var r *os.File
+	sw := args[0]
+	if l < 2 {
+		r = os.Stdin
+	} else {
+		var err error
+		r, err = os.Open(args[1])
+		if err != nil {
+			return nil, err
+		}
+		defer r.Close()
+	}
+
+	// オプション指定がある場合はIgnoreCaseを有効化
+	var re *regexp.Regexp
+	if opts.IgnoreCase {
+		re = regexp.MustCompile(`(?i)` + sw)
+	} else {
+		re = regexp.MustCompile(sw)
+	}
+
+	// セクション内でマッチしたものにフィルタ1
+	ss, err := findMatchedSections(r, re)
+	if err != nil {
+		return nil, err
+	}
+
+	// ヘッダ行から検索フィルタ
+	if opts.Tag {
+		ss = section.SearchHeader(ss, re)
+		// 2未満だったらソート判定すら不要なのでreturn
+		if len(ss) < 2 {
+			return ss, nil
+		}
+	}
+
+	// 逆順ソート
+	if opts.Reverse {
+		section.Reverse(ss)
+	}
+
+	return ss, nil
+}
+
+func findMatchedSections(r *os.File, re *regexp.Regexp) ([]section.Section, error) {
+	var sect section.Section = make([]string, 0)
+	matchedSections := make([]section.Section, 0)
 
 	sc := bufio.NewScanner(r)
-	matches := make([]string, 0) // マッチした段落
-	para := make([]string, 0)    // 段落
-	appendFlag := true
 	for sc.Scan() {
-		if err := sc.Err(); err != nil {
-			break
-		}
-		t := sc.Text()
-
-		// 今日の日付のみ設定があるときだけフラグ操作
-		if opts.TodayFormat != "" && containsDateString(t) {
-			if isToday(t) {
-				appendFlag = true
-			} else {
-				appendFlag = false
+		line := sc.Text()
+		if isBlankLine(line) {
+			if sect.MatchesRegexp(re) {
+				matchedSections = append(matchedSections, sect)
 			}
-		}
-		if !appendFlag {
+			sect = make([]string, 0)
 			continue
 		}
-
-		// デフォルトではインデントは削除
-		// 指定があるときだけインデントを残す
-		if !opts.ShowIndent {
-			t = strings.Replace(t, "\t", "", 1)
-		}
-		para = append(para, t)
-
-		// 空文字を段落の区切れ目と判定
-		if t == "" {
-			// 段落単位で検索ワードの出現を検査
-			// 段落内にワードが見つかったらその段落はまるごとmatchに追加してbreak
-			for _, v := range para {
-				iv := v
-				if opts.IgnoreCase {
-					iv = strings.ToLower(iv)
-				}
-				if swRe.MatchString(iv) {
-					matches = append(matches, strings.Join(para, "\n"))
-					para = make([]string, 0)
-					break
-				}
-			}
-			para = make([]string, 0)
+		sect = append(sect, line)
+	}
+	if 0 < len(sect) {
+		if sect.MatchesRegexp(re) {
+			matchedSections = append(matchedSections, sect)
 		}
 	}
-
-	// 残ってる可能性があるので
-	if 0 < len(para) {
-		matches = append(matches, strings.Join(para, "\n"))
+	if err := sc.Err(); err != nil {
+		return nil, err
 	}
-
-	// 逆順フラグが立ってるときは逆順ソート
-	if opts.Reverse {
-		reverse(matches)
-	}
-	matchedText := strings.Join(matches, "\n")
-	fmt.Println(matchedText)
+	return matchedSections, nil
 }
 
-// 配列を逆順ソートして上書きする
-func reverse(s []string) {
-	for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
-		s[i], s[j] = s[j], s[i]
-	}
-}
-
-// isToday は文字列が今日の日付かどうかを判定します。
-func isToday(s string) bool {
-	return strings.HasPrefix(s, today)
-}
-
-// isDateString は文字列が日付文字列を含むかを判定します。
-func containsDateString(s string) bool {
-	l := len(opts.TodayFormat)
-	if len(s) < l {
-		return false
-	}
-	s2 := s[:l]
-	_, err := time.Parse(opts.TodayFormat, s2)
-	return err == nil
+func isBlankLine(s string) bool {
+	return strings.TrimSpace(s) == ""
 }
