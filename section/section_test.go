@@ -12,7 +12,9 @@ func TestMatchesRegexp(t *testing.T) {
 	re := regexp.MustCompile(`abc`)
 
 	assert.Equal(t, true, f("*test: foo", "abc").MatchesRegexp(re))
+	assert.Equal(t, true, f("*test: foo", "	abc").MatchesRegexp(re))
 	assert.Equal(t, true, f("*test: foo", "xabcx").MatchesRegexp(re))
+	assert.Equal(t, true, f("	*test: foo", "	xabcx").MatchesRegexp(re))
 	assert.Equal(t, false, f("foobar").MatchesRegexp(re))
 	assert.Equal(t, false, f().MatchesRegexp(re))
 
@@ -31,6 +33,7 @@ func TestMatchesTag(t *testing.T) {
 	assert.Equal(t, true, f("*main.go: foobar").MatchesTag(re))
 	assert.Equal(t, true, f("*main.go: ").MatchesTag(re))
 	assert.Equal(t, true, f("*main.go:").MatchesTag(re))
+	assert.Equal(t, true, f("	*main.go:").MatchesTag(re))
 	assert.Equal(t, false, f("*hoge.go: main", "abc").MatchesTag(re))
 	assert.Equal(t, false, f("*hoge.go: main", "main").MatchesTag(re))
 	assert.Equal(t, false, f("*hoge.go: fuga", "main").MatchesTag(re))
