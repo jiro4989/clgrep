@@ -96,6 +96,10 @@ func clgrep(args []string, opts options.Options) ([]section.Section, error) {
 		section.Reverse(ss)
 	}
 
+	if !opts.ShowIndent {
+		ss = section.TrimSpace(ss)
+	}
+
 	return ss, nil
 }
 

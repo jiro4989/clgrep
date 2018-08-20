@@ -3,6 +3,7 @@ package section
 import (
 	"fmt"
 	"regexp"
+	"time"
 )
 
 type Section []string
@@ -43,4 +44,14 @@ func Reverse(ss []Section) {
 	for i, j := 0, len(ss)-1; i < j; i, j = i+1, j-1 {
 		ss[i], ss[j] = ss[j], ss[i]
 	}
+}
+
+// TrimSpace はセクションのスペースを取り除く。
+func TrimSpace(ss []Section) []Section {
+	return nil
+}
+
+// MatchDate は指定の日付にマッチしたセクションのみにフィルタする。
+func MatchDate(ss []Section, dt time.Time) []Section {
+	return nil
 }
