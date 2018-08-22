@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	flags "github.com/jessevdk/go-flags"
-	options "github.com/jiro4989/clgrep/options"
+	options "github.com/jiro4989/clgrep/internal/options"
 	"github.com/jiro4989/clgrep/section"
 )
 
